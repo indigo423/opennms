@@ -726,6 +726,9 @@ else
 	ADD_MODULES="--add-modules=${JAVA_MODULES[*]}"
 	IFS="$OIFS"
 	JAVA_CMD=("${JAVA_CMD[@]}" "$ADD_MODULES")
+
+	# use datetime serialization compatibility (see NMS-12261)
+	JAVA_CMD+=("-Djava.locale.providers=COMPAT")
 fi
 
 if [ -n "$USE_INCGC" ] && [ "$USE_INCGC" = true ] ; then

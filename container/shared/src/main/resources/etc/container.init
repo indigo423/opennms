@@ -68,6 +68,12 @@ unset JAVA_OPTS
 # always dump heap if we OOM
 EXTRA_JAVA_OPTS="$EXTRA_JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
 
+# -Djava.local.providers setting is for JDK8 datetime compatibility (see NMS-12261)
+#
+# DEPRECATION WARNING: "JRE" will eventually go away, but it is supported by JDK8-11.
+# When we move to JDK11+ only, change "JRE" to "COMPAT".
+EXTRA_JAVA_OPTS="$EXTRA_JAVA_OPTS -Djava.locale.providers=JRE"
+
 # export any default configurable variables from sysconf
 export RUNAS JAVA_MIN_MEM JAVA_MAX_MEM MAX_FD JAVA_HOME JAVA JAVA_DEBUG_OPTS JAVA_DEBUG_PORT EXTRA_JAVA_OPTS CLASSPATH KARAF_DEBUG LD_LIBRARY_PATH
 

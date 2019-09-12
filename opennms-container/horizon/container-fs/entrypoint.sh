@@ -129,6 +129,11 @@ applyOverlayConfig() {
   fi
 }
 
+# -Djava.local.providers setting is for JDK8 datetime compatibility (see NMS-12261)
+#
+# DEPRECATION WARNING: "JRE" will eventually go away, but it is supported by JDK8-11.
+# When we move to JDK11+ only, change "JRE" to "COMPAT".
+
 # Start opennms in foreground
 start() {
   local OPENNMS_JAVA_OPTS="--add-modules=java.base,java.compiler,java.datatransfer,java.desktop,java.instrument,java.logging,java.management,java.management.rmi,java.naming,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.xml,jdk.attach,jdk.httpserver,jdk.jdi,jdk.sctp,jdk.security.auth,jdk.xml.dom \
@@ -140,6 +145,7 @@ start() {
   -Dcom.sun.management.jmxremote.access.file=/opt/opennms/etc/jmxremote.access
   -DisThreadContextMapInheritable=true
   -Dgroovy.use.classvalue=true
+  -Djava.locale.providers=JRE
   -Djava.io.tmpdir=/opt/opennms/data/tmp
   -XX:+StartAttachListener"
   exec ${JAVA_HOME}/bin/java ${OPENNMS_JAVA_OPTS} ${JAVA_OPTS} -jar /opt/opennms/lib/opennms_bootstrap.jar start
