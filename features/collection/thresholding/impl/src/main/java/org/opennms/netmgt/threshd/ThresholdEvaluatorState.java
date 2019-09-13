@@ -29,6 +29,7 @@
 package org.opennms.netmgt.threshd;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.opennms.netmgt.threshd.api.ThresholdingSession;
 import org.opennms.netmgt.xml.event.Event;
@@ -59,9 +60,14 @@ public interface ThresholdEvaluatorState {
     default Status evaluate(double dsValue) {
         return evaluate(dsValue, null);
     }
-    
+
     Status evaluate(double dsValue, Long sequenceNumber);
 
+    /**
+     * @return an entry with the evaluated value set as the key and the resulting status set as the value
+     */
+    Map.Entry<Double, Status> evaluate(ExpressionThresholdValue valueSupplier, Long sequenceNumber);
+    
     /**
      * <p>getEventForState</p>
      *

@@ -32,10 +32,14 @@ import static org.opennms.core.utils.InetAddressUtils.addr;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.AbstractMap;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.joda.time.Duration;
 import org.nustaq.serialization.FSTConfiguration;
@@ -52,6 +56,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.swrve.ratelimitedlogger.RateLimitedLog;
 
 /**
@@ -60,7 +65,7 @@ import com.swrve.ratelimitedlogger.RateLimitedLog;
  * @author ranger
  * @version $Id: $
  */
-public abstract class AbstractThresholdEvaluatorState<T extends Serializable> implements ThresholdEvaluatorState {
+public abstract class AbstractThresholdEvaluatorState<T extends AbstractThresholdEvaluatorState.AbstractState> implements ThresholdEvaluatorState {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractThresholdEvaluatorState.class);
     private static final RateLimitedLog RATE_LIMITED_LOGGER = RateLimitedLog
             .withRateLimit(LOG)
@@ -116,6 +121,23 @@ public abstract class AbstractThresholdEvaluatorState<T extends Serializable> im
             })
             .asMap();
 
+    static abstract class AbstractState implements Serializable {
+        String evaluatedExpression = null;
+
+        Optional<String> getEvaluatedExpression() {
+            return Optional.ofNullable(evaluatedExpression);
+        }
+        
+        void setEvaluatedExpression(String expression) {
+            evaluatedExpression = Objects.requireNonNull(expression);
+        }
+
+        @Override
+        public String toString() {
+            return "evaluatedExpression='" + evaluatedExpression + "'";
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     public AbstractThresholdEvaluatorState(BaseThresholdDefConfigWrapper threshold,
                                            ThresholdingSession thresholdingSession) {
@@ -195,8 +217,7 @@ public abstract class AbstractThresholdEvaluatorState<T extends Serializable> im
         isStateDirty = true;
     }
 
-    @Override
-    public Status evaluate(double dsValue, Long sequenceNumber) {
+    private Status evaluate(Supplier<Double> valueSupplier, Long sequenceNumber, Consumer<Double> computedValueConsumer) {
         if (sequenceNumber != null) {
             // If a sequence number was provided, only fetch the state if this is the first sequence number we have seen
             // or if this was not the next sequence number (indicating someone else processed the last one)
@@ -209,11 +230,41 @@ public abstract class AbstractThresholdEvaluatorState<T extends Serializable> im
             fetchState();
         }
 
+        double dsValue = valueSupplier.get();
+
+        if (computedValueConsumer != null) {
+            computedValueConsumer.accept(dsValue);
+        }
+        
         Status status = evaluateAfterFetch(dsValue);
         // Persist the state if it has changed and is now dirty
         persistStateIfNeeded();
         firstEvaluation = false;
         return status;
+    }
+
+    @Override
+    public Status evaluate(double dsValue, Long sequenceNumber) {
+        return evaluate(() -> dsValue, sequenceNumber, null);
+    }
+
+    @Override
+    public Map.Entry<Double, Status> evaluate(ExpressionThresholdValue valueSupplier, Long sequenceNumber) {
+        AtomicDouble computedValue = new AtomicDouble(Double.NaN);
+        Status status = evaluate(() -> getValueForExpressionThreshold(valueSupplier), sequenceNumber, computedValue::set);
+        
+        return new AbstractMap.SimpleImmutableEntry<>(computedValue.get(), status);
+    }
+
+    private double getValueForExpressionThreshold(ExpressionThresholdValue expressionThresholdValue) {
+        if (!state.getEvaluatedExpression().isPresent()) {
+            // We don't have any evaluated expression associated with this state, we will record one now if
+            // applicable
+            return expressionThresholdValue.get(expr -> state.setEvaluatedExpression(expr));
+        } else {
+            // We already have an evaluated expression associated so we can instruct the supplier to use it
+            return expressionThresholdValue.get(state.getEvaluatedExpression().get());
+        }
     }
 
     @Override

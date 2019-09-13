@@ -103,15 +103,6 @@ public abstract class BaseThresholdDefConfigWrapper {
     public abstract Collection<String> getRequiredDatasources();
     
     /**
-     * Evaluate the threshold expression/datasource in terms of the named values supplied, and return that value
-     *
-     * @param values named values to use in evaluating the expression/data source
-     * @return the value of the evaluated expression
-     * @throws org.opennms.netmgt.threshd.ThresholdExpressionException if any.
-     */
-    public abstract double evaluate(Map<String, Double> values)  throws ThresholdExpressionException;
-    
-    /**
      * <p>getDsType</p>
      *
      * @return a {@link java.lang.String} object.
@@ -259,5 +250,6 @@ public abstract class BaseThresholdDefConfigWrapper {
         m_baseDef = threshold.getBasethresholddef();
     }
     
+    public abstract void accept(ThresholdDefVisitor thresholdDefVisitor);
 }
 

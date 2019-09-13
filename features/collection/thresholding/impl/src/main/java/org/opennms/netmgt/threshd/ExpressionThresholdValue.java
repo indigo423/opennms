@@ -26,18 +26,21 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.core.rpc.utils.mate;
+package org.opennms.netmgt.threshd;
 
-import java.net.InetAddress;
+import java.util.function.Consumer;
 
-public interface EntityScopeProvider {
-    Scope getScopeForNode(final Integer nodeId);
+public interface ExpressionThresholdValue {
+    /**
+     * @param expressionConsumer a consumer for accepting the interpolated expression for caching purposes
+     * @return the expression value
+     */
+    double get(Consumer<String> expressionConsumer);
 
-    Scope getScopeForInterface(final Integer nodeId, final String ipAddress);
-
-    Scope getScopeForInterfaceUsingIndex(final Integer nodeId, final String ifIndex);
-
-    Scope getScopeForService(final Integer nodeId, final InetAddress ipAddress, final String serviceName);
-
-    Scope getScopeForService(final Integer nodeId, final String ifIndex, final String serviceName);
+    /**
+     * @param evaluatedExpression the already interpolated expression which will be used rather than interpolating the
+     *                            expression
+     * @return the expression value
+     */
+    double get(String evaluatedExpression);
 }

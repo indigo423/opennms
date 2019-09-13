@@ -26,18 +26,9 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.core.rpc.utils.mate;
+package org.opennms.netmgt.threshd;
 
-import java.net.InetAddress;
-
-public interface EntityScopeProvider {
-    Scope getScopeForNode(final Integer nodeId);
-
-    Scope getScopeForInterface(final Integer nodeId, final String ipAddress);
-
-    Scope getScopeForInterfaceUsingIndex(final Integer nodeId, final String ifIndex);
-
-    Scope getScopeForService(final Integer nodeId, final InetAddress ipAddress, final String serviceName);
-
-    Scope getScopeForService(final Integer nodeId, final String ifIndex, final String serviceName);
+public interface ThresholdDefVisitor {
+    void visit(ThresholdConfigWrapper thresholdConfigWrapper);
+    void visit(ExpressionConfigWrapper expressionConfigWrapper);
 }

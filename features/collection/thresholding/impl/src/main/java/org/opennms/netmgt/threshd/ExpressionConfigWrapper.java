@@ -33,10 +33,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.apache.commons.jexl2.ExpressionImpl;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.MapContext;
+import org.opennms.core.rpc.utils.mate.Interpolator;
+import org.opennms.core.rpc.utils.mate.Scope;
 import org.opennms.netmgt.config.threshd.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,14 +55,16 @@ public class ExpressionConfigWrapper extends BaseThresholdDefConfigWrapper {
 
     private final Expression m_expression;
     private final Collection<String> m_datasources;
+    
+    private final JexlEngine jexlEngine = new JexlEngine();
+    
     public ExpressionConfigWrapper(Expression expression) throws ThresholdExpressionException {
         super(expression);
         m_expression = expression;
 
-        JexlEngine expressionParser = new JexlEngine();
         m_datasources = new ArrayList<>();
         try {
-            ExpressionImpl e = (ExpressionImpl) expressionParser.createExpression(m_expression.getExpression());
+            ExpressionImpl e = (ExpressionImpl) jexlEngine.createExpression(m_expression.getExpression());
             LOG.trace("List of Variables on the Expression: {}", e.getVariables());
             for (List<String> list : e.getVariables()) { // Requires JEXL 2.1.x
                 if (list.get(0).equalsIgnoreCase("math")) {
@@ -140,21 +145,37 @@ public class ExpressionConfigWrapper extends BaseThresholdDefConfigWrapper {
         public float ulp(float a) { return Math.ulp(a); }
     }
 
-    @Override
-    public double evaluate(Map<String, Double> values) throws ThresholdExpressionException {
+    public double evaluate(String expression, Map<String, Double> values) throws ThresholdExpressionException {
         // Add all of the variable values to the script context
-        Map<String,Object> context = new HashMap<String,Object>();
-        context.putAll(values);
-        context.put("datasources", new HashMap<String, Double>(values)); // To workaround NMS-5019
+        Map<String, Object> context = new HashMap<>(values);
+        context.put("datasources", new HashMap<>(values)); // To workaround NMS-5019
         context.put("math", new MathBinding());
-        double result = Double.NaN;
+        double result;
         try {
             // Fetch an instance of the JEXL script engine to evaluate the script expression
-            Object resultObject = new JexlEngine().createExpression(m_expression.getExpression()).evaluate(new MapContext(context));
+            Object resultObject = jexlEngine.createExpression(expression).evaluate(new MapContext(context));
             result = Double.parseDouble(resultObject.toString());
         } catch (Throwable e) {
             throw new ThresholdExpressionException("Error while evaluating expression " + m_expression.getExpression() + ": " + e.getMessage(), e);
         }
         return result;
+    }
+
+    public double evaluate(Consumer<String> expressionConsumer, Map<String, Double> values, Scope scope) throws ThresholdExpressionException {
+        String expression = interpolateExpression(m_expression.getExpression(), scope);
+        expressionConsumer.accept(expression);
+        return evaluate(expression, values);
+    }
+
+    @Override
+    public void accept(ThresholdDefVisitor thresholdDefVisitor) {
+        thresholdDefVisitor.visit(this);
+    }
+
+    private static String interpolateExpression(String expression, Scope scope) {
+        if (Interpolator.containsMateData(expression)) {
+            return Interpolator.interpolate(expression, scope);
+        }
+        return expression;
     }
 }

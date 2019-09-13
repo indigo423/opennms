@@ -49,4 +49,14 @@ public final class MockEntityScopeProvider implements EntityScopeProvider {
     public Scope getScopeForService(final Integer nodeId, final InetAddress ipAddress, final String serviceName) {
         return EmptyScope.EMPTY;
     }
+
+    @Override
+    public Scope getScopeForInterfaceUsingIndex(Integer nodeId, String ifIndex) {
+        return EmptyScope.EMPTY;
+    }
+
+    @Override
+    public Scope getScopeForService(Integer nodeId, String ifIndex, String serviceName) {
+        return EmptyScope.EMPTY;
+    }
 }
