@@ -284,6 +284,7 @@ public final class ThresholdEntity implements Cloneable {
                     public double get(Consumer<String> expressionConsumer) {
                         Scope[] scopes = new Scope[3];
 
+                        // TODO: These need to be fixed
                         if (resource != null) {
                             scopes[0] = m_entityScopeProvider.getScopeForNode(resource.getNodeId());
                             scopes[1] = m_entityScopeProvider.getScopeForInterfaceUsingIndex(resource.getNodeId(),

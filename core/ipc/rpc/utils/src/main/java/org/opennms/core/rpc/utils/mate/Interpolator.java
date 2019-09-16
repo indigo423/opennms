@@ -89,7 +89,11 @@ public class Interpolator {
         return stringBuffer.toString();
     }
     
-    public static boolean containsMateData(String raw) {
-        return OUTER_PATTERN.matcher(raw).matches();
-    } 
+    public static boolean containsMateData(String toCheck) {
+        return OUTER_PATTERN.matcher(toCheck).find();
+    }
+    
+    public static String substituteMateData(String input, String replacement) {
+        return input.replaceAll(OUTER_REGEXP, replacement);
+    }
 }

@@ -257,14 +257,15 @@ public abstract class AbstractThresholdEvaluatorState<T extends AbstractThreshol
     }
 
     private double getValueForExpressionThreshold(ExpressionThresholdValue expressionThresholdValue) {
-        if (!state.getEvaluatedExpression().isPresent()) {
-            // We don't have any evaluated expression associated with this state, we will record one now if
-            // applicable
-            return expressionThresholdValue.get(expr -> state.setEvaluatedExpression(expr));
-        } else {
-            // We already have an evaluated expression associated so we can instruct the supplier to use it
-            return expressionThresholdValue.get(state.getEvaluatedExpression().get());
-        }
+//        if (!state.getEvaluatedExpression().isPresent()) {
+//            // We don't have any evaluated expression associated with this state, we will record one now if
+//            // applicable
+//            return expressionThresholdValue.get(expr -> state.setEvaluatedExpression(expr));
+//        } else {
+//            // We already have an evaluated expression associated so we can instruct the supplier to use it
+//            return expressionThresholdValue.get(state.getEvaluatedExpression().get());
+//        }
+        return expressionThresholdValue.get(expr -> state.setEvaluatedExpression(expr));
     }
 
     @Override

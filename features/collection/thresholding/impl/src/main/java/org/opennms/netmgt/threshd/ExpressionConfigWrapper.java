@@ -64,7 +64,10 @@ public class ExpressionConfigWrapper extends BaseThresholdDefConfigWrapper {
 
         m_datasources = new ArrayList<>();
         try {
-            ExpressionImpl e = (ExpressionImpl) jexlEngine.createExpression(m_expression.getExpression());
+            // We need to remove any mate data that are part of the expression before we try to find the datasources so
+            // we will substitute all instances with "1" to keep the expression valid
+            ExpressionImpl e = (ExpressionImpl) jexlEngine
+                    .createExpression(Interpolator.substituteMateData(m_expression.getExpression(), "1"));
             LOG.trace("List of Variables on the Expression: {}", e.getVariables());
             for (List<String> list : e.getVariables()) { // Requires JEXL 2.1.x
                 if (list.get(0).equalsIgnoreCase("math")) {
@@ -163,6 +166,12 @@ public class ExpressionConfigWrapper extends BaseThresholdDefConfigWrapper {
 
     public double evaluate(Consumer<String> expressionConsumer, Map<String, Double> values, Scope scope) throws ThresholdExpressionException {
         String expression = interpolateExpression(m_expression.getExpression(), scope);
+        // If the expression still contains mate data then we weren't able to fully interpolate it and we should not
+        // continue
+        if (Interpolator.containsMateData(expression)) {
+            throw new ThresholdExpressionException("Error could not fully interpolating expression " +
+                    m_expression.getExpression());
+        }
         expressionConsumer.accept(expression);
         return evaluate(expression, values);
     }
