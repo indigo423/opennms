@@ -59,6 +59,7 @@ import org.opennms.smoketest.stacks.JsonStoreStrategy;
 import org.opennms.smoketest.stacks.NetworkProtocol;
 import org.opennms.smoketest.stacks.OpenNMSProfile;
 import org.opennms.smoketest.stacks.OpenNMSStack;
+import org.opennms.smoketest.stacks.SentinelProfile;
 import org.opennms.smoketest.stacks.StackModel;
 import org.opennms.smoketest.telemetry.Packet;
 import org.opennms.smoketest.utils.KarafShell;
@@ -77,7 +78,7 @@ public class SentinelThresholdingIT {
                     .withFile("sentinel-thresholding/thresholds.xml", "etc/thresholds.xml")
                     .build())
             .withMinion()
-            .withSentinel()
+            .withSentinels(SentinelProfile.newBuilder().withJvmDebuggingEnabled(true).build())
             .withTelemetryProcessing()
             .withBlobStoreStrategy(BlobStoreStrategy.NEWTS_CASSANDRA)
             .withJsonStoreStrategy(JsonStoreStrategy.POSTGRES)

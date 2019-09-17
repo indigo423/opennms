@@ -53,7 +53,7 @@ import org.opennms.netmgt.config.threshd.Expression;
  */
 public class ExpressionConfigWrapperTest {
     
-    private final String FORMULA = "ifSpeed > 0 and ifSpeed < 100000000 ? ((ifInOctets * 8 / ifSpeed) * ${requisition:testMultiplier|1}) : (ifHighSpeed > 0 ? (((ifHCInOctets * 8) / (ifHighSpeed * 1000000)) * ${requisition:testMultiplier|1}) : 0)";
+    private final String FORMULA = "ifSpeed > 0 and ifSpeed < 100000000 ? ((ifInOctets * 8 / ifSpeed) * ${requisition:testMultiplier|0}) : (ifHighSpeed > 0 ? (((ifHCInOctets * 8) / (ifHighSpeed * 1000000)) * ${requisition:testMultiplier|0}) : 0)";
 
     private ExpressionConfigWrapper wrapper;
     
