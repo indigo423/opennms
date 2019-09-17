@@ -66,7 +66,8 @@ public interface ThresholdEvaluatorState {
     /**
      * @return an entry with the evaluated value set as the key and the resulting status set as the value
      */
-    Map.Entry<Double, Status> evaluate(ExpressionThresholdValue valueSupplier, Long sequenceNumber);
+    Map.Entry<Double, Status> evaluate(ExpressionThresholdValue valueSupplier, Long sequenceNumber)
+            throws ThresholdExpressionException;
     
     /**
      * <p>getEventForState</p>

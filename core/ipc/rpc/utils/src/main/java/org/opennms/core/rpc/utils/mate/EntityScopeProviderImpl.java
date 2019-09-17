@@ -123,24 +123,6 @@ public class EntityScopeProviderImpl implements EntityScopeProvider {
     }
 
     @Override
-    public Scope getScopeForInterfaceUsingIndex(final Integer nodeId, final String ifIndex) {
-        if (nodeId == null || Strings.isNullOrEmpty(ifIndex)) {
-            return EmptyScope.EMPTY;
-        }
-
-        Optional<InetAddress> ipAddress = ifIndexToIpaddress(ifIndex, nodeId);
-
-        if (!ipAddress.isPresent()) {
-            return EmptyScope.EMPTY;
-        }
-
-        String interfaceIp = ipAddress.map(InetAddress::toString).get();
-
-        return getScopeForInterface(nodeId, interfaceIp);
-    }
-
-
-    @Override
     public Scope getScopeForService(final Integer nodeId, final InetAddress ipAddress, final String serviceName) {
         if (nodeId == null || ipAddress == null || Strings.isNullOrEmpty(serviceName)) {
             return EmptyScope.EMPTY;
@@ -161,51 +143,25 @@ public class EntityScopeProviderImpl implements EntityScopeProvider {
         return metaDataScope;
     }
 
-    @Override
-    public Scope getScopeForService(Integer nodeId, String ifIndex, String serviceName) {
-        if (nodeId == null || Strings.isNullOrEmpty(ifIndex) || Strings.isNullOrEmpty(serviceName)) {
-            return EmptyScope.EMPTY;
-        }
-
-        Optional<InetAddress> ipAddress = ifIndexToIpaddress(ifIndex, nodeId);
-
-        if (!ipAddress.isPresent()) {
-            return EmptyScope.EMPTY;
-        }
-
-        String interfaceIp = ipAddress.map(InetAddress::toString).get();
-
-        return getScopeForService(nodeId, interfaceIp, serviceName);
-    }
-
     private static MapScope transform(final Collection<OnmsMetaData> metaData) {
         final Map<ContextKey, String> map = metaData.stream()
                 .collect(Collectors.toMap(e -> new ContextKey(e.getContext(), e.getKey()), e -> e.getValue()));
         return new MapScope(map);
     }
 
-    private Optional<InetAddress> ifIndexToIpaddress(String ifIndex, Integer nodeId) {
-        return this.sessionUtils.withReadOnlyTransaction(() -> this.nodeDao.get(nodeId)
-                .getIpInterfaces()
-                .stream()
-                .filter(i -> Objects.equals(i.getIfIndex(), Integer.parseInt(ifIndex)))
-                .map(OnmsIpInterface::getIpAddress)
-                .findAny());
-    }
-
     public void setNodeDao(NodeDao nodeDao) {
-        this.nodeDao = nodeDao;
+        this.nodeDao = Objects.requireNonNull(nodeDao);
     }
 
     public void setIpInterfaceDao(IpInterfaceDao ipInterfaceDao) {
-        this.ipInterfaceDao = ipInterfaceDao;
+        this.ipInterfaceDao = Objects.requireNonNull(ipInterfaceDao);
     }
 
     public void setMonitoredServiceDao(MonitoredServiceDao monitoredServiceDao) {
-        this.monitoredServiceDao = monitoredServiceDao;
+        this.monitoredServiceDao = Objects.requireNonNull(monitoredServiceDao);
     }
 
     public void setSessionUtils(SessionUtils sessionUtils) {
-        this.sessionUtils = sessionUtils;
+        this.sessionUtils = Objects.requireNonNull(sessionUtils);
     }
 }

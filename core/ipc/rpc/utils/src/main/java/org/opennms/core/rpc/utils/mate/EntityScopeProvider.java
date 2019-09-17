@@ -35,9 +35,5 @@ public interface EntityScopeProvider {
 
     Scope getScopeForInterface(final Integer nodeId, final String ipAddress);
 
-    Scope getScopeForInterfaceUsingIndex(final Integer nodeId, final String ifIndex);
-
     Scope getScopeForService(final Integer nodeId, final InetAddress ipAddress, final String serviceName);
-
-    Scope getScopeForService(final Integer nodeId, final String ifIndex, final String serviceName);
 }

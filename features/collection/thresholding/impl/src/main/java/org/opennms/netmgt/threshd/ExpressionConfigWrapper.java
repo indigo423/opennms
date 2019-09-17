@@ -38,6 +38,7 @@ import java.util.function.Consumer;
 import org.apache.commons.jexl2.ExpressionImpl;
 import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.MapContext;
+import org.opennms.core.rpc.utils.mate.EmptyScope;
 import org.opennms.core.rpc.utils.mate.Interpolator;
 import org.opennms.core.rpc.utils.mate.Scope;
 import org.opennms.netmgt.config.threshd.Expression;
@@ -65,9 +66,9 @@ public class ExpressionConfigWrapper extends BaseThresholdDefConfigWrapper {
         m_datasources = new ArrayList<>();
         try {
             // We need to remove any mate data that are part of the expression before we try to find the datasources so
-            // we will substitute all instances with "1" to keep the expression valid
+            // we will interpolate with an empty scope and rely on default values to keep the expression valid
             ExpressionImpl e = (ExpressionImpl) jexlEngine
-                    .createExpression(Interpolator.substituteMateData(m_expression.getExpression(), "1"));
+                    .createExpression(interpolateExpression(m_expression.getExpression(), EmptyScope.EMPTY));
             LOG.trace("List of Variables on the Expression: {}", e.getVariables());
             for (List<String> list : e.getVariables()) { // Requires JEXL 2.1.x
                 if (list.get(0).equalsIgnoreCase("math")) {
@@ -166,12 +167,6 @@ public class ExpressionConfigWrapper extends BaseThresholdDefConfigWrapper {
 
     public double evaluate(Consumer<String> expressionConsumer, Map<String, Double> values, Scope scope) throws ThresholdExpressionException {
         String expression = interpolateExpression(m_expression.getExpression(), scope);
-        // If the expression still contains mate data then we weren't able to fully interpolate it and we should not
-        // continue
-        if (Interpolator.containsMateData(expression)) {
-            throw new ThresholdExpressionException("Error could not fully interpolating expression " +
-                    m_expression.getExpression());
-        }
         expressionConsumer.accept(expression);
         return evaluate(expression, values);
     }
@@ -182,9 +177,8 @@ public class ExpressionConfigWrapper extends BaseThresholdDefConfigWrapper {
     }
 
     private static String interpolateExpression(String expression, Scope scope) {
-        if (Interpolator.containsMateData(expression)) {
-            return Interpolator.interpolate(expression, scope);
-        }
-        return expression;
+        return Interpolator.containsMateData(expression) ?
+                Interpolator.interpolate(expression, scope) :
+                expression;
     }
 }

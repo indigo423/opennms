@@ -3,8 +3,11 @@
     <reference id="thresholdingDao" interface="org.opennms.netmgt.config.dao.thresholding.api.ReadableThresholdingDao"/>
     <reference id="pollOutagesDao" interface="org.opennms.netmgt.config.dao.outages.api.ReadablePollOutagesDao"/>
     <reference id="ifLabelDao" interface="org.opennms.netmgt.dao.api.IfLabel"/>
-    
-   <!-- TODO: Get entityScopeProvider deps -->
+    <reference id="nodeDao" interface="org.opennms.netmgt.dao.api.NodeDao"/>
+    <reference id="ipInterfaceDao" interface="org.opennms.netmgt.dao.api.IpInterfaceDao"/>
+    <reference id="monitoredServiceDao" interface="org.opennms.netmgt.dao.api.MonitoredServiceDao"/>
+    <reference id="sessionUtils" interface="org.opennms.netmgt.dao.api.SessionUtils"/>
+
     <bean id="entityScopeProvider" class="org.opennms.core.rpc.utils.mate.EntityScopeProviderImpl">
         <property name="nodeDao" ref="nodeDao"/>
         <property name="ipInterfaceDao" ref="ipInterfaceDao"/>

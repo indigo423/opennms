@@ -29,15 +29,20 @@
 package org.opennms.netmgt.threshd;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opennms.core.rpc.utils.mate.ContextKey;
+import org.opennms.core.rpc.utils.mate.EmptyScope;
 import org.opennms.core.rpc.utils.mate.Scope;
 import org.opennms.core.test.MockLogAppender;
 import org.opennms.netmgt.config.threshd.Expression;
@@ -48,7 +53,7 @@ import org.opennms.netmgt.config.threshd.Expression;
  */
 public class ExpressionConfigWrapperTest {
     
-    private final String FORMULA = "ifSpeed > 0 and ifSpeed < 100000000 ? ((ifInOctets * 8 / ifSpeed) * 100) : (ifHighSpeed > 0 ? (((ifHCInOctets * 8) / (ifHighSpeed * 1000000)) * 100) : 0)";
+    private final String FORMULA = "ifSpeed > 0 and ifSpeed < 100000000 ? ((ifInOctets * 8 / ifSpeed) * ${requisition:testMultiplier|1}) : (ifHighSpeed > 0 ? (((ifHCInOctets * 8) / (ifHighSpeed * 1000000)) * ${requisition:testMultiplier|1}) : 0)";
 
     private ExpressionConfigWrapper wrapper;
     
@@ -59,6 +64,7 @@ public class ExpressionConfigWrapperTest {
         MockLogAppender.setupLogging(true, "TRACE"); 
         Expression exp = new Expression();
         exp.setExpression(FORMULA);
+        when(scope.get(new ContextKey("requisition", "testMultiplier"))).thenReturn(Optional.of("100"));
         wrapper = new ExpressionConfigWrapper(exp);
         Assert.assertEquals(4, wrapper.getRequiredDatasources().size());
     }

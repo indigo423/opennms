@@ -35,12 +35,12 @@ public interface ExpressionThresholdValue {
      * @param expressionConsumer a consumer for accepting the interpolated expression for caching purposes
      * @return the expression value
      */
-    double get(Consumer<String> expressionConsumer);
+    double get(Consumer<String> expressionConsumer) throws ThresholdExpressionException;
 
     /**
      * @param evaluatedExpression the already interpolated expression which will be used rather than interpolating the
      *                            expression
      * @return the expression value
      */
-    double get(String evaluatedExpression);
+    double get(String evaluatedExpression) throws ThresholdExpressionException;
 }

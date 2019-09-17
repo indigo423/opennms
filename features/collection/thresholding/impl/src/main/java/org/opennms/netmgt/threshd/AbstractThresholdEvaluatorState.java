@@ -39,7 +39,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.joda.time.Duration;
 import org.nustaq.serialization.FSTConfiguration;
@@ -122,19 +121,19 @@ public abstract class AbstractThresholdEvaluatorState<T extends AbstractThreshol
             .asMap();
 
     static abstract class AbstractState implements Serializable {
-        String evaluatedExpression = null;
+        String interpolatedExpression = null;
 
-        Optional<String> getEvaluatedExpression() {
-            return Optional.ofNullable(evaluatedExpression);
+        Optional<String> getInterpolatedExpression() {
+            return Optional.ofNullable(interpolatedExpression);
         }
         
-        void setEvaluatedExpression(String expression) {
-            evaluatedExpression = Objects.requireNonNull(expression);
+        void setInterpolatedExpression(String expression) {
+            interpolatedExpression = Objects.requireNonNull(expression);
         }
 
         @Override
         public String toString() {
-            return "evaluatedExpression='" + evaluatedExpression + "'";
+            return "interpolatedExpression='" + interpolatedExpression + "'";
         }
     }
     
@@ -217,7 +216,7 @@ public abstract class AbstractThresholdEvaluatorState<T extends AbstractThreshol
         isStateDirty = true;
     }
 
-    private Status evaluate(Supplier<Double> valueSupplier, Long sequenceNumber, Consumer<Double> computedValueConsumer) {
+    private Status evaluate(double dsValue, Long sequenceNumber, Consumer<Double> computedValueConsumer) {
         if (sequenceNumber != null) {
             // If a sequence number was provided, only fetch the state if this is the first sequence number we have seen
             // or if this was not the next sequence number (indicating someone else processed the last one)
@@ -229,8 +228,6 @@ public abstract class AbstractThresholdEvaluatorState<T extends AbstractThreshol
             // Always fetch the state to make sure we have the latest if we don't know the sequence number
             fetchState();
         }
-
-        double dsValue = valueSupplier.get();
 
         if (computedValueConsumer != null) {
             computedValueConsumer.accept(dsValue);
@@ -245,27 +242,29 @@ public abstract class AbstractThresholdEvaluatorState<T extends AbstractThreshol
 
     @Override
     public Status evaluate(double dsValue, Long sequenceNumber) {
-        return evaluate(() -> dsValue, sequenceNumber, null);
+        return evaluate(dsValue, sequenceNumber, null);
     }
 
     @Override
-    public Map.Entry<Double, Status> evaluate(ExpressionThresholdValue valueSupplier, Long sequenceNumber) {
+    public Map.Entry<Double, Status> evaluate(ExpressionThresholdValue valueSupplier, Long sequenceNumber)
+            throws ThresholdExpressionException {
         AtomicDouble computedValue = new AtomicDouble(Double.NaN);
-        Status status = evaluate(() -> getValueForExpressionThreshold(valueSupplier), sequenceNumber, computedValue::set);
+        double dsValue = getValueForExpressionThreshold(valueSupplier);
+        Status status = evaluate(dsValue, sequenceNumber, computedValue::set);
         
         return new AbstractMap.SimpleImmutableEntry<>(computedValue.get(), status);
     }
 
-    private double getValueForExpressionThreshold(ExpressionThresholdValue expressionThresholdValue) {
-//        if (!state.getEvaluatedExpression().isPresent()) {
-//            // We don't have any evaluated expression associated with this state, we will record one now if
-//            // applicable
-//            return expressionThresholdValue.get(expr -> state.setEvaluatedExpression(expr));
-//        } else {
-//            // We already have an evaluated expression associated so we can instruct the supplier to use it
-//            return expressionThresholdValue.get(state.getEvaluatedExpression().get());
-//        }
-        return expressionThresholdValue.get(expr -> state.setEvaluatedExpression(expr));
+    private double getValueForExpressionThreshold(ExpressionThresholdValue expressionThresholdValue)
+            throws ThresholdExpressionException {
+        if (!state.getInterpolatedExpression().isPresent()) {
+            // We don't have any evaluated expression associated with this state, we will record one now if
+            // applicable
+            return expressionThresholdValue.get(expr -> state.setInterpolatedExpression(expr));
+        } else {
+            // We already have an evaluated expression associated so we can instruct the supplier to use it
+            return expressionThresholdValue.get(state.getInterpolatedExpression().get());
+        }
     }
 
     @Override
@@ -332,8 +331,12 @@ public abstract class AbstractThresholdEvaluatorState<T extends AbstractThreshol
         // Add datasource name
         bldr.addParam("ds", getThresholdConfig().getDatasourceExpression());
 
-        // Add threshold description
-        final String descr = getThresholdConfig().getBasethresholddef().getDescription().orElse(getThresholdConfig().getDatasourceExpression());
+        // Add threshold description using the interpolated expression if available
+        final String descr = getThresholdConfig()
+                .getBasethresholddef()
+                .getDescription()
+                .orElseGet(() -> state.getInterpolatedExpression().orElse(getThresholdConfig().getDatasourceExpression()));
+
         bldr.addParam("description", descr);
 
         // Add last known value of the datasource fetched from its RRD file

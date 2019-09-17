@@ -90,10 +90,6 @@ public class Interpolator {
     }
     
     public static boolean containsMateData(String toCheck) {
-        return OUTER_PATTERN.matcher(toCheck).find();
-    }
-    
-    public static String substituteMateData(String input, String replacement) {
-        return input.replaceAll(OUTER_REGEXP, replacement);
+        return toCheck != null && OUTER_PATTERN.matcher(toCheck).find();
     }
 }
