@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+umask 002
+
 TMP_FILE="/tmp/health"
 SENTINEL_HOME="/opt/sentinel"
 
