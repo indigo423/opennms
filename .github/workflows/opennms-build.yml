@@ -465,6 +465,9 @@ jobs:
   publish-core-debian-package:
     needs:
       - core-debian-package
+      - e2e-tests-core
+      - e2e-tests-minion
+      - e2e-tests-sentinel
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     container:
@@ -485,6 +488,9 @@ jobs:
   publish-minion-debian-package:
     needs:
       - minion-debian-package
+      - e2e-tests-core
+      - e2e-tests-minion
+      - e2e-tests-sentinel
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     container:
@@ -505,6 +511,9 @@ jobs:
   publish-sentinel-debian-package:
     needs:
       - sentinel-debian-package
+      - e2e-tests-core
+      - e2e-tests-minion
+      - e2e-tests-sentinel
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     container:
