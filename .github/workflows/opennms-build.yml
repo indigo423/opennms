@@ -9,11 +9,9 @@ jobs:
   quick-build:
     if: "!contains(github.event.commits[0].message, '[skip quick-build]')"
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Cleaning project for quick validation
@@ -88,11 +86,9 @@ jobs:
     needs:
       - quick-build
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Build Core Debian packages
@@ -109,11 +105,9 @@ jobs:
     needs:
       - quick-build
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Build Minion Debian packages
@@ -130,11 +124,9 @@ jobs:
     needs:
       - quick-build
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Build Sentinel Debian packages
@@ -266,11 +258,9 @@ jobs:
     needs:
       - quick-build
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Prepare the build for tests
@@ -304,11 +294,9 @@ jobs:
     needs:
       - quick-build
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Prepare the build for tests and installing it
@@ -344,11 +332,9 @@ jobs:
       - unit-tests
       - integration-tests
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Build and assemble with container images
@@ -385,11 +371,9 @@ jobs:
       - unit-tests
       - integration-tests
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Build and assemble with container images
@@ -426,12 +410,9 @@ jobs:
       - unit-tests
       - integration-tests
     runs-on:
-      group: Default
-      labels:
-        - self-hosted
-        - Linux
-        - X64
-        - 32g-ram
+      - self-hosted
+      - Linux
+      - X64
     steps:
       - uses: actions/checkout@v4
       - name: Build and assemble with container images
