@@ -54,7 +54,7 @@ public class EventFormTest {
      */
     @Before
     public void setUp() throws Exception {
-        File config = new File(ConfigurationTestUtils.getDaemonEtcDirectory(), "events/MPLS.events.xml");
+        File config = new File(ConfigurationTestUtils.getDaemonEtcDirectory(), "events/opennms.pollerd.events.xml");
         Assert.assertTrue(config.exists());
         dao = new DefaultEventConfDao();
         dao.setConfigResource(new FileSystemResource(config));
@@ -80,7 +80,7 @@ public class EventFormTest {
         Assert.assertTrue(logMsgDest instanceof ComboBox);
         Assert.assertEquals(LogDestType.LOGNDISPLAY, LogDestType.valueOf(logMsgDest.getValue().toString().toUpperCase()));
 
-        String eventUei = "uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelUp";
+        String eventUei = "uei.opennms.org/nodes/nodeDown";
         Event event = dao.findByUei(eventUei);
         Assert.assertNotNull(event);
 
@@ -101,7 +101,7 @@ public class EventFormTest {
     @Test
     public void testEventWithoutAlarmData() throws Exception {
         EventForm form = new EventForm();
-        Event event = dao.findByUei("uei.opennms.org/ietf/mplsTeStdMib/traps/mplsTunnelReoptimized");
+        Event event = dao.findByUei("uei.opennms.org/nodes/deleteService");
         Assert.assertNotNull(event);
         Assert.assertNull(event.getAlarmData());
         form.setEvent(event);
@@ -127,7 +127,7 @@ public class EventFormTest {
     @Test
     public void testEventWithAlarmData() throws Exception {
         EventForm form = new EventForm();
-        Event event = dao.findByUei("uei.opennms.org/mpls/traps/mplsVrfIfDown");
+        Event event = dao.findByUei("uei.opennms.org/nodes/nodeDown");
         Assert.assertNotNull(event);
         Assert.assertNotNull(event.getAlarmData());
         form.setEvent(event);
