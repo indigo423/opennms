@@ -61,7 +61,7 @@ jobs:
     if: "!contains(github.event.commits[0].message, '[skip deps-freshness]')"
     runs-on: ubuntu-latest
     container:
-      image: quay.io/bluebird/java-builder:0.1.3.jdk-17.b3
+      image: quay.io/labmonkeys/java-builder:0.1.3.jdk-17.b3
     steps:
       - uses: actions/checkout@v4
       - name: Add workspace to git safe.directory
@@ -172,7 +172,7 @@ jobs:
           context: ./opennms-container/core
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: quay.io/bluebird/core-snapshot:${{ github.sha }}.b${{ github.run_id }}
+          tags: quay.io/labmonkeys/core-snapshot:${{ github.sha }}.b${{ github.run_id }}
 
   minion-oci:
     if: "!contains(github.event.commits[0].message, '[skip minion-oci]')"
@@ -215,7 +215,7 @@ jobs:
           context: ./opennms-container/minion
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: quay.io/bluebird/minion-snapshot:${{ github.sha }}.b${{ github.run_id }}
+          tags: quay.io/labmonkeys/minion-snapshot:${{ github.sha }}.b${{ github.run_id }}
 
   sentinel-oci:
     if: "!contains(github.event.commits[0].message, '[skip sentinel-oci]')"
@@ -251,7 +251,7 @@ jobs:
           context: ./opennms-container/sentinel
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: quay.io/bluebird/sentinel-snapshot:${{ github.sha }}.b${{ github.run_id }}
+          tags: quay.io/labmonkeys/sentinel-snapshot:${{ github.sha }}.b${{ github.run_id }}
 
   unit-tests:
     if: "!contains(github.event.commits[0].message, '[skip unit-tests]')"
@@ -447,12 +447,10 @@ jobs:
     needs:
       - core-debian-package
       - e2e-tests-core
-      - e2e-tests-minion
-      - e2e-tests-sentinel
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     container:
-      image: quay.io/bluebird/base-builder:ubuntu.0.1.5.b8
+      image: quay.io/labmonkeys/base-builder:ubuntu.0.1.5.b8
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -463,19 +461,17 @@ jobs:
         run: |
           export CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }}
           for deb in $(ls target/artifacts/debian/core/*.deb); do
-            cloudsmith push deb --republish bluebird/develop/any-distro/any-version ${deb};
+            cloudsmith push deb --republish labmonkeys/develop/any-distro/any-version ${deb};
           done;
 
   publish-minion-debian-package:
     needs:
       - minion-debian-package
-      - e2e-tests-core
       - e2e-tests-minion
-      - e2e-tests-sentinel
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     container:
-      image: quay.io/bluebird/base-builder:ubuntu.0.1.5.b8
+      image: quay.io/labmonkeys/base-builder:ubuntu.0.1.5.b8
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -486,19 +482,17 @@ jobs:
         run: |
           export CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }}
           for deb in $(ls target/artifacts/debian/minion/*.deb); do
-            cloudsmith push deb --republish bluebird/develop/any-distro/any-version ${deb};
+            cloudsmith push deb --republish labmonkeys/develop/any-distro/any-version ${deb};
           done;
 
   publish-sentinel-debian-package:
     needs:
       - sentinel-debian-package
-      - e2e-tests-core
-      - e2e-tests-minion
       - e2e-tests-sentinel
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     container:
-      image: quay.io/bluebird/base-builder:ubuntu.0.1.5.b8
+      image: quay.io/labmonkeys/base-builder:ubuntu.0.1.5.b8
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -509,5 +503,5 @@ jobs:
         run: |
           export CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }}
           for deb in $(ls target/artifacts/debian/sentinel/*.deb); do
-            cloudsmith push deb --republish bluebird/develop/any-distro/any-version ${deb};
+            cloudsmith push deb --republish labmonkeys/develop/any-distro/any-version ${deb};
           done;
