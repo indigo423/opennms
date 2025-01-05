@@ -81,8 +81,8 @@ public class EventconfFactoryIT {
 
     private static final String knownUEI1="uei.opennms.org/nodes/nodeDown";
     private static final String knownLabel1="OpenNMS-defined node event: nodeDown";
-    private static final String knownSubfileUEI1="uei.opennms.org/IETF/Bridge/traps/newRoot";
-    private static final String knownSubfileLabel1="BRIDGE-MIB defined trap event: newRoot";
+    private static final String knownSubfileUEI1="uei.opennms.org/traps/eventTrap";
+    private static final String knownSubfileLabel1="OPENNMS-MIB defined trap event: eventTrap";
     private static final String unknownUEI1="uei.opennms.org/foo/thisShouldBeAnUnknownUEI";
     
     DefaultEventConfDao m_eventConfDao;
