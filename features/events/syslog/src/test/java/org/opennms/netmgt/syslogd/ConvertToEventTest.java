@@ -484,13 +484,13 @@ public class ConvertToEventTest {
 
     /**
      * Tests a message that looks like this:
-     * <189>: 2018 Jul 16 23:56:11 CDT: %ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface Ethernet119/1/36 is down (Link failure)
+     * <189>: 2018 Jul 16 23:56:11 UTC: %ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface Ethernet119/1/36 is down (Link failure)
      */
     @Test
     public void testCiscoPatternA() throws ParseException {
         int messageFacilityPriority = 189;
         String messageContent = "%ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface Ethernet119/1/36 is down (Link failure)";
-        String timeZone = "CDT";
+        String timeZone = "UTC";
         String date = "2018 Jul 16 23:56:11";
         String syslogMessage = "<" + messageFacilityPriority + ">: " + date + " " + timeZone + ": " + messageContent;
         Event event = parseSyslog("testCiscoPatternA", radixConfig, syslogMessage, new Date());
@@ -570,7 +570,7 @@ public class ConvertToEventTest {
 
     /**
      * Tests a message that looks like this:
-     * <12> 2017 Jul 6 08:42:31 CDT *host1-2-3-4* 1,2017/06/02 01:59:06,123ABC456, THREAT
+     * <12> 2017 Jul 6 08:42:31 UTC *host1-2-3-4* 1,2017/06/02 01:59:06,123ABC456, THREAT
      */
     @Test
     public void testCiscoPatternE() throws ParseException {
@@ -578,7 +578,7 @@ public class ConvertToEventTest {
         String messageContent = "1,2017/06/02 01:59:06,123ABC456, THREAT";
         String hostName = "host1-2-3-4";
         String date = "2017 Jul 6 08:42:31";
-        String timeZone = "CDT";
+        String timeZone = "UTC";
         String syslogMessage = "<" + messageFacilityPriority + "> " + date + " " + timeZone + " *" + hostName + "* " +
                 messageContent;
         Event event = parseSyslog("testCiscoPatternE", radixConfig, syslogMessage, new Date());
@@ -592,14 +592,14 @@ public class ConvertToEventTest {
 
     /**
      * Tests a message that looks like this:
-     * <12> 2017 Jul 6 08:42:31 CDT 1,2017/06/02 01:59:06,123ABC456, THREAT
+     * <12> 2017 Jul 6 08:42:31 UTC 1,2017/06/02 01:59:06,123ABC456, THREAT
      */
     @Test
     public void testCiscoPatternF() throws ParseException {
         int messageFacilityPriority = 12;
         String messageContent = "1,2017/06/02 01:59:06,123ABC456, THREAT";
         String date = "2017 Jul 6 08:42:31";
-        String timeZone = "CDT";
+        String timeZone = "UTC";
         String syslogMessage = "<" + messageFacilityPriority + "> " + date + " " + timeZone + " " + messageContent;
         Event event = parseSyslog("testCiscoPatternF", radixConfig, syslogMessage, new Date());
         assertEquals(SyslogSeverity.getSeverityForCode(messageFacilityPriority).toString(),
@@ -641,7 +641,7 @@ public class ConvertToEventTest {
      */
     @Test
     public void testPatternWithWhitespace() {
-        String syslogMessage = "<123>123456: Jan   \t1 01:10:10.123 CDT: %BGP-5-ADJCHANGE: neighbor 1.2.3.4 vpn " +
+        String syslogMessage = "<123>123456: Jan   \t1 01:10:10.123 UTC: %BGP-5-ADJCHANGE: neighbor 1.2.3.4 vpn " +
                 "vrf abc-def Up";
         Event event = parseSyslog("testPatternWithWhitespace", radixConfig, syslogMessage, new Date());
         assertThat(event.getLogmsg().getContent().startsWith("%BGP"), is(equalTo(true)));
@@ -653,7 +653,7 @@ public class ConvertToEventTest {
     @Test
     public void testIgnoreParms() {
         String ignoredParmValue = "00123456";
-        String syslogMessage = "<123>456: " + ignoredParmValue + ": Jan  1 1:10:10.123 CDT: %SYS-5-CONFIG_I: " +
+        String syslogMessage = "<123>456: " + ignoredParmValue + ": Jan  1 1:10:10.123 UTC: %SYS-5-CONFIG_I: " +
                 "Configured from console by hostname123 on vty2 (1.2.3.4)";
         Event event = parseSyslog("testIgnoreParms", radixConfig, syslogMessage, new Date());
         boolean hasParmValue =
@@ -670,13 +670,13 @@ public class ConvertToEventTest {
     public void testNewAuditPatterns() {
         testAuditPattern("<189>98485: Nov  1 11:09:04: %SYS-5-CONFIG_I: Configured from console by hostname123 on " +
                 "vty1 (1.2.3.4)", "%SYS-5-CONFIG_I");
-        testAuditPattern("<189>414: 000414: Nov  1 11:07:45.159 CDT: %SYS-5-CONFIG_I: Configured from console by " +
+        testAuditPattern("<189>414: 000414: Nov  1 11:07:45.159 UTC: %SYS-5-CONFIG_I: Configured from console by " +
                 "hostname123 on vty2 (1.2.3.4)", "%SYS-5-CONFIG_I");
-        testAuditPattern("<189>Nov  1 10:57:48.136 CDT:  10948: RP/0/RSP0/CPU0:Nov  1 10:57:48.136 CDT: bgp[1234]: " +
+        testAuditPattern("<189>Nov  1 10:57:48.136 UTC:  10948: RP/0/RSP0/CPU0:Nov  1 10:57:48.136 UTC: bgp[1234]: " +
                 "%ROUTING-BGP-5-ADJCHANGE : neighbor 1.2.3.4 Up (VRF: abc) (AS: 12345)", "%ROUTING-BGP-5-ADJCHANGE");
         testAuditPattern("<189>104897820: 104894003: Nov  1 01:46:05: %HSRP-5-STATECHANGE: Vlan123 Grp 123 state " +
                 "Speak -> Standby", "%HSRP-5-STATECHANGE");
-        testAuditPattern("<189>17460: Nov  1 01:14:41.474 CDT: %BGP-5-ADJCHANGE: neighbor 1.2.3.4 vpn vrf abc-def Up"
+        testAuditPattern("<189>17460: Nov  1 01:14:41.474 UTC: %BGP-5-ADJCHANGE: neighbor 1.2.3.4 vpn vrf abc-def Up"
                 , "%BGP-5-ADJCHANGE");
         testAuditPattern("<189>: 2019 Feb  1 00:17:15 cst: %ETHPORT-5-IF_DOWN_LINK_FAILURE: Interface Ethernet1/15 is down (Link failure)"
                 , "%ETHPORT-5-IF_DOWN_LINK_FAILURE");
@@ -689,7 +689,7 @@ public class ConvertToEventTest {
     
     @Test
     public void canIncludeRawSyslogmessage() {
-        String rawMessage = "<123>123456: Jan 1 01:10:10.123 CDT: %BGP-5-ADJCHANGE: neighbor 1.2.3.4 vpn " +
+        String rawMessage = "<123>123456: Jan 1 01:10:10.123 UTC: %BGP-5-ADJCHANGE: neighbor 1.2.3.4 vpn " +
                 "vrf abc-def Up";
         // Test that default behavior is to not include
         boolean existingConfig = radixConfig.shouldIncludeRawSyslogmessage();
